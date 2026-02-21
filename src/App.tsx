@@ -55,7 +55,7 @@ const getRelativeTime = (ts: string | null | undefined): string => {
   if (h < 24) return `${h}h ago`; return `${dy}d ago`;
 };
 
-const getImg = (item: any, idx = 0) => {
+const getImg = (item: any) => {
   // Use first image from image_urls field if available
   if (item.image_urls) {
     const first = item.image_urls.split(",")[0].trim();
@@ -75,25 +75,31 @@ const PRICE_OPTIONS = [
   { label: "₹20,000 Plus",       min: 20000, max: null  },
 ];
 
-const parseNLP = (q) => {
-  if (!q) return {};
-  const s = q.toLowerCase(); const r = {};
+interface NLPResult {
+  cityQuery?: string;
+  bhk?: string;
+  furnishing?: string;
+  preference?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
 
-  // City detection
+const parseNLP = (q: string): NLPResult => {
+  if (!q) return {};
+  const s = q.toLowerCase();
+  const r: NLPResult = {};
+
   const cityMatch = s.match(/\bin\s+([a-z\s]+?)(?:\s+under|\s+below|\s+above|\s+upto|\s+fully|\s+semi|\s+un|,|$)/);
   if (cityMatch) r.cityQuery = cityMatch[1].trim();
 
-  // BHK type
   ['studio','1rk','1bhk','2bhk','3bhk','4bhk','shared room'].forEach(t => {
     if (s.includes(t)) r.bhk = t === 'shared room' ? 'Shared Room' : t.toUpperCase();
   });
 
-  // Furnishing
   if (s.includes('fully furnished')) r.furnishing = 'Fully Furnished';
   else if (s.includes('semi furnished') || s.includes('semi-furnished')) r.furnishing = 'Semi-Furnished';
   else if (s.includes('unfurnished')) r.furnishing = 'Unfurnished';
 
-  // Preference keywords
   if (s.includes('female') || s.includes('women') || s.includes('ladies')) r.preference = 'Females Only';
   if (s.includes('bachelor')) r.preference = 'Bachelors Only';
   if (s.includes('family')) r.preference = 'Family Only';
@@ -101,10 +107,9 @@ const parseNLP = (q) => {
   if (s.includes('vegetarian')) r.preference = 'Vegetarians Only';
   if (s.includes('no restriction')) r.preference = 'No Restrictions';
 
-  // Price keywords: "under 10000", "below 15k", "upto 20k", "above 10000", "budget"
   const underMatch = s.match(/(?:under|below|upto|up to|within)\s*₹?\s*(\d+)\s*k?/);
   if (underMatch) {
-    const val = parseInt(underMatch[1]) * (s[underMatch.index + underMatch[0].length - 1] === 'k' || parseInt(underMatch[1]) < 500 ? 1000 : 1);
+    const val = parseInt(underMatch[1]) * (s[underMatch.index! + underMatch[0].length - 1] === 'k' || parseInt(underMatch[1]) < 500 ? 1000 : 1);
     r.maxPrice = val;
   }
   const aboveMatch = s.match(/(?:above|over|more than|minimum)\s*₹?\s*(\d+)\s*k?/);
@@ -112,7 +117,7 @@ const parseNLP = (q) => {
     const val = parseInt(aboveMatch[1]) * (parseInt(aboveMatch[1]) < 500 ? 1000 : 1);
     r.minPrice = val;
   }
-  // "budget" = under 10k heuristic
+
   if (s.includes('budget') && !r.maxPrice) r.maxPrice = 10000;
   if (s.includes('affordable') && !r.maxPrice) r.maxPrice = 15000;
   if (s.includes('luxury') || s.includes('premium')) r.minPrice = r.minPrice || 20000;
