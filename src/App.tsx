@@ -14,6 +14,23 @@ const IMGS = [
   "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
 ];
 
+interface Listing {
+  post_id: string;
+  timestamp?: string;
+  city?: string;
+  locality?: string;
+  price?: number;
+  bhk_type?: string;
+  accommodation_type?: string;
+  furnishing?: string;
+  owner_preference?: string;
+  contact_details?: string | null;
+  map_link?: string | null;
+  fb_post_url?: string | null;
+  additional_description?: string;
+  image_urls?: string;
+}
+
 // Preview data using your real rows — shown while live data loads or if fetch fails
 const PREVIEW = [
   { post_id:"FB_KOL_001", timestamp:"2026-02-04T01:48:00Z", city:"Kolkata", locality:"Kasba", price:16861, bhk_type:"Studio", accommodation_type:"Private Room", furnishing:"Semi-Furnished", owner_preference:"No Restrictions", contact_details:"Rahul: +91 7006206502", map_link:"https://www.google.com/maps/search/?api=1&query=22.578093667787986,88.38753061978939", fb_post_url:"https://www.facebook.com/share/v/17iWH8FsvA/", additional_description:"Near Metro station. Gas connection ready. Please DM for more details." },
@@ -29,16 +46,16 @@ const PREVIEW = [
   { post_id:"FB_KOL_011", timestamp:"2026-02-08T09:48:00Z", city:"Kolkata", locality:"Lake Town", price:23396, bhk_type:"Studio", accommodation_type:"Entire Flat", furnishing:"Fully Furnished", owner_preference:"Females Only", contact_details:null, map_link:"https://www.google.com/maps/search/?api=1&query=22.59319246533573,88.38678161394063", fb_post_url:"https://www.facebook.com/share/p/1CaqKDXD9F/", additional_description:"Walking distance to IT park. No brokerage involved. Please DM for more details." },
 ];
 
-const getRelativeTime = (ts) => {
+const getRelativeTime = (ts: string | null | undefined): string => {
   if (!ts) return "Recently";
-  const d = new Date(ts), diff = Date.now() - d;
-  if (isNaN(d)) return "Recently";
+  const d = new Date(ts), diff = Date.now() - d.getTime();
+  if (isNaN(d.getTime())) return "Recently";
   const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), dy = Math.floor(diff/86400000);
   if (m < 1) return "Just now"; if (m < 60) return `${m}m ago`;
   if (h < 24) return `${h}h ago`; return `${dy}d ago`;
 };
 
-const getImg = (item, idx=0) => {
+const getImg = (item: any, idx = 0) => {
   // Use first image from image_urls field if available
   if (item.image_urls) {
     const first = item.image_urls.split(",")[0].trim();
@@ -155,15 +172,15 @@ const Card = ({ item, onClick, liked, onLike }) => (
 
 export default function App() {
   const [view, setView] = useState('home');
-  const [allData, setAllData] = useState(PREVIEW);
+  const [allData, setAllData] = useState<Listing[]>(PREVIEW);
   const [loadState, setLoadState] = useState('preview'); // preview | loading | done | error
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [results, setResults] = useState(PREVIEW);
-  const [selected, setSelected] = useState(null);
+  const [results, setResults] = useState<Listing[]>(PREVIEW);
+  const [selected, setSelected] = useState<Listing | null>(null);
   const [showContact, setShowContact] = useState(false);
   const [filters, setFilters] = useState({city:'',bhk:'',furnishing:''});
-  const [liked, setLiked] = useState({});
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [navVisible, setNavVisible] = useState(true);
   const [page, setPage] = useState(1);
   const PAGE = 24;
