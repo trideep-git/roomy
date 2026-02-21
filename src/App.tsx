@@ -184,7 +184,15 @@ export default function App() {
   const [results, setResults] = useState<Listing[]>(PREVIEW);
   const [selected, setSelected] = useState<Listing | null>(null);
   const [showContact, setShowContact] = useState(false);
-  const [filters, setFilters] = useState({city:'',bhk:'',furnishing:''});
+  const [filters, setFilters] = useState<{
+  city: string;
+  bhk: string;
+  furnishing: string;
+  preference: string;
+  priceRange: string;
+  minPrice: number | string;
+  maxPrice: number | string;
+}>({city:'',bhk:'',furnishing:'',preference:'',priceRange:'',minPrice:'',maxPrice:''});
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [navVisible, setNavVisible] = useState(true);
   const [page, setPage] = useState(1);
@@ -339,10 +347,10 @@ export default function App() {
 
               <div style={{display:'flex',gap:'8px',flexWrap:'wrap',justifyContent:'center'}}>
                 {opts.cities.map(c=>(
-                  <button key={c} onClick={()=>doSearch(`in ${c}`,{...filters,city:c})}
+                  <button key={c} onClick={()=>doSearch(`in ${c}`,{...filters,city:c ?? ''})}
                     style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'9999px',padding:'5px 14px',fontSize:'11px',color:'#71717a',cursor:'pointer',fontWeight:600,transition:'all 0.15s'}}
-                    onMouseEnter={e=>{e.target.style.color='white';e.target.style.borderColor='rgba(255,255,255,0.2)';}}
-                    onMouseLeave={e=>{e.target.style.color='#71717a';e.target.style.borderColor='rgba(255,255,255,0.07)';}}>
+                    onMouseEnter={e=>{(e.currentTarget as HTMLButtonElement).style.color='white';(e.currentTarget as HTMLButtonElement).style.borderColor='rgba(255,255,255,0.2)';}}
+                    onMouseLeave={e=>{(e.currentTarget as HTMLButtonElement).style.color='#71717a';(e.currentTarget as HTMLButtonElement).style.borderColor='rgba(255,255,255,0.07)';}}
                     {c}
                   </button>
                 ))}
@@ -371,10 +379,10 @@ export default function App() {
               </div>
               {filterOpen && (
                 <div style={{display:'flex',gap:'7px',flexWrap:'wrap',padding:'8px 2px 0',alignItems:'center'}}>
-                  <FilterPill label="City" options={opts.cities} value={filters.city} onChange={v=>{const nf={...filters,city:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
-                  <FilterPill label="Type" options={opts.types} value={filters.bhk} onChange={v=>{const nf={...filters,bhk:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
-                  <FilterPill label="Furnishing" options={opts.furnishings} value={filters.furnishing} onChange={v=>{const nf={...filters,furnishing:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
-                  <FilterPill label="Preference" options={opts.preferences} value={filters.preference} onChange={v=>{const nf={...filters,preference:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
+                  <FilterPill label="City" options={opts.cities} value={filters.city} onChange={(v: string)=>{const nf={...filters,city:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
+                  <FilterPill label="Type" options={opts.types} value={filters.bhk} onChange={(v: string)=>{const nf={...filters,bhk:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
+                  <FilterPill label="Furnishing" options={opts.furnishings} value={filters.furnishing} onChange={(v: string)=>{const nf={...filters,furnishing:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
+                  <FilterPill label="Preference" options={opts.preferences} value={filters.preference} onChange={(v: string)=>{const nf={...filters,preference:v};setFilters(nf);doSearch(searchQuery,nf);}}/>
                   <select value={filters.priceRange||''} onChange={e=>{
                       const opt = PRICE_OPTIONS.find(o=>o.label===e.target.value);
                       const nf={...filters,priceRange:e.target.value,minPrice:opt?.min??'',maxPrice:opt?.max??''};
@@ -421,7 +429,7 @@ export default function App() {
             </button>
             <div style={{background:'#0f0f0f',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'20px',overflow:'hidden'}}>
               <div style={{position:'relative',height:'260px'}}>
-                <img src={getImg(selected)} style={{width:'100%',height:'100%',objectFit:'cover'}} alt="room" onError={e=>e.target.src=IMGS[2]}/>
+                <img src={getImg(selected)} style={{width:'100%',height:'100%',objectFit:'cover'}} alt="room" onError={e=>(e.currentTarget as HTMLImageElement).src=IMGS[2]}/>
                 <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(15,15,15,1) 0%,rgba(15,15,15,0.15) 55%,transparent 100%)'}}/>
                 <div style={{position:'absolute',bottom:'20px',left:'22px',right:'60px'}}>
                   <p style={{fontSize:'30px',fontWeight:900,color:'white',margin:0,lineHeight:1}}>
