@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   Search, SlidersHorizontal, X, Heart, MessageSquare,
-  ChevronLeft, Loader, AlertCircle, MapPin, RefreshCw, ArrowUp, Info
+  ChevronLeft, Loader, AlertCircle, MapPin, ArrowUp, Info
 } from "lucide-react";
 
 const API = "https://roomy-listings-136208599777.asia-south1.run.app";
